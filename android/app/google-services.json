@@ -1,0 +1,28 @@
+{
+  "project_info": {
+    "project_number": "1081329231722",
+    "project_id": "mutualyst-9211",
+    "storage_bucket": "mutualyst-9211.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1081329231722:android:YOUR_ANDROID_CLIENT_ID",
+        "android_client_info": {
+          "package_name": "com.mutualyst"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDk-p-uoBlHs_RZ_-V6xAcbyRGCzlS06mU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ]
+} 
