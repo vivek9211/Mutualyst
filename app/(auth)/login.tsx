@@ -18,7 +18,7 @@ export default function LoginScreen() {
     setIsLoading(true);
     try {
       await login(email, password);
-      router.replace('/(tabs)');
+      // The auth state change will trigger the redirect in the root layout
     } catch (error: any) {
       Alert.alert('Error', error.message);
     } finally {

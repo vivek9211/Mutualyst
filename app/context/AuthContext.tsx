@@ -1,16 +1,16 @@
 import {
+  browserLocalPersistence,
   createUserWithEmailAndPassword,
-  onAuthStateChanged,
+  setPersistence,
   signInWithEmailAndPassword,
   signOut,
-  User,
 } from 'firebase/auth';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { auth } from '../config/firebase';
+import { useAuthState } from '../hooks/useAuthState';
 
-// Type for the context
 type AuthContextType = {
-  user: User | null;
+  user: ReturnType<typeof useAuthState>['user'];
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -20,34 +20,19 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading } = useAuthState();
 
   useEffect(() => {
-    console.log('Setting up auth state listener');
-    // Subscribe to auth state changes
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('Auth state changed:', user ? 'User logged in' : 'User logged out');
-      setUser(user);
-      setIsLoading(false);
-    }, (error) => {
-      console.error('Auth state change error:', error);
-      setIsLoading(false);
+    // Set persistence to LOCAL (7 days)
+    setPersistence(auth, browserLocalPersistence).catch((error) => {
+      console.error('Error setting persistence:', error);
     });
-
-    return () => {
-      console.log('Cleaning up auth state listener');
-      unsubscribe();
-    };
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('Attempting login for:', email);
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log('Login successful:', userCredential.user.email);
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
-      console.error('Login error:', error);
       let errorMessage = 'Failed to login. Please try again.';
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         errorMessage = 'Invalid email or password.';
@@ -64,11 +49,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (email: string, password: string) => {
     try {
-      console.log('Attempting registration for:', email);
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log('Registration successful:', userCredential.user.email);
+      await createUserWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
-      console.error('Registration error:', error);
       let errorMessage = 'Failed to register. Please try again.';
       if (error.code === 'auth/email-already-in-use') {
         errorMessage = 'Email is already registered.';
@@ -83,11 +65,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      console.log('Attempting logout');
       await signOut(auth);
-      console.log('Logout successful');
     } catch (error) {
-      console.error('Logout error:', error);
       throw error;
     }
   };
